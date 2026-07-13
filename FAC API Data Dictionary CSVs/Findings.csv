@@ -1,0 +1,38 @@
+FINDINGS  ENDPOINT,https://api.fac.gov/findings,Unnamed: 2,Unnamed: 3
+FIELD NAME,DESCRIPTION,DETAILS,CHARACTER LIMITS/LENGTH
+report_id,Identifier for the audit report,,25
+auditee_uei,Unique Entity Identifier (UEI) of the auditee,,12 to 13
+audit_year,Year in which the audit was conducted,,4
+fac_accepted_date,Date when the FAC accepted an audit,mm/dd/yyyy,10
+award_reference,The award reference number as listed in SF-SAC Section 1: Federal Awards. Award references will be formatted “AWARD-####”.,FAC system generated sequence number used to link to Findings data between CFDA/ALN Info and Findings,10 to 11
+reference_number,Findings reference numbers,The audit finding reference number as listed in SF-SAC Section 1: Federal Awards. Audit finding reference numbers will be formatted “YYYY-###”.,8
+is_material_weakness,Indicates if the finding is classified as a material weakness ,"""Y"" if the auditor identified an audit finding as a Material Weakness in the audit report PDF. ""N"" if not.",1
+is_modified_opinion,Indicates if the finding resulted in a modified audit opinion ,"""Y"" if the auditor identified an audit finding as the basis for a modified opinion. ""N"" if not.
+",1
+is_other_findings,"Indicates if the finding falls under ""other findings"" ","""Y"" if Modified Opinion (column D), Other Matters (column E), Material Weakness (column F), and Significant Deficiency (collumn G) are all marked ""N"".""N"" if any of these fields are marked ""Y"".",1
+is_other_matters,"Indicates if the finding involves ""other matters""","""Y"" if the auditor identified an audit finding in the ""Other Matters"" section of the audit report PDF. ""N"" if not.",1
+prior_finding_ref_numbers,Audit finding reference numbers from the immediate prior audit,The audit finding reference number from the most recent prior audit if the audit finding is a repeat. “N/A” if the audit finding isn't a repeat.,3 to 118
+is_questioned_costs,Indicates if the finding includes questioned costs,"""Y"" if there are questioned costs related to the audit finding, even if the amount can't be determined. ""N"" If there are no questioned costs.",1
+is_repeat_finding,Indicates if the finding was reported in a prior year,"""Y"" if the audit finding is a repeat from the immediate prior audit. ""N"" if it isn't a repeat finding.",1
+is_significant_deficiency,Indicates if the finding is classified as a significant deficiency ,"""Y"" if the auditor identified an audit finding as a Significant Deficiency in the audit report PDF. ""N"" if not.",1
+type_requirement,Code indicating the type of compliance requirement affected by the finding ,"The valid codes are a combination of one or more of the valid values, in alphabetical order, with no repeated values. The types of compliance requirements are:
+
+A. Activities allowed or unallowed
+B. Allowable costs/cost principles
+C. Cash management
+D. Reserved
+E. Eligibility
+F. Equipment and real property management
+G. Matching, level of effort, earmarking
+H. Period of performance (or availability) of Federal funds
+I. Procurement and suspension and debarment
+J. Program income
+K. Reserved
+L. Reporting
+M. Subrecipient monitoring
+N. Special tests and provisions
+P. Other
+
+Note: There is no ""O"" option. 
+
+",1 to 13

@@ -1,0 +1,10 @@
+RESUBMISSION ENDPOINT,https://api.fac.gov/resubmission,Unnamed: 2,Unnamed: 3
+FIELD NAME,DESCRIPTION,DETAILS,CHARACTER LIMITS/LENGTH
+report_id,Unique identifier for the audit report,,25
+auditee_uei,Unique Entity Identifier (UEI) of the auditee,,12 to 13
+audit_year,Year in which the audit was conducted,,4
+fac_accepted_date,Date when the FAC accepted an audit,mm/dd/yyyy,10
+version,Version of the resubmission,,1 or 2
+status,"Status of the resubmission (“most_recent”, “deprecated_by_resubmission”, or “unknown”)",,11 to 27
+previous_report_id,The report_id of the previous version,,25
+next_report_id,The report_id of the next version,,25

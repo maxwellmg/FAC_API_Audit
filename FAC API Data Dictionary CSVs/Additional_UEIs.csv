@@ -1,0 +1,7 @@
+ADDITIONAL_UEIS ENDPOINT,https://api.fac.gov/additional_ueis,Unnamed: 2,Unnamed: 3
+FIELD NAME,DESCRIPTION,DETAILS,CHARACTER LIMITS/LENGTH
+report_id,Identifier for the audit report.,,25
+auditee_uei,Unique Entity Identifier (UEI) of the auditee.,,12 to 13
+audit_year,Year in which the audit was conducted.,,4
+fac_accepted_date,Date when the FAC accepted an audit,mm/dd/yyyy,10
+additional_uei,Additional Unique Entity Identifier (UEI) associated with the auditee.,,12

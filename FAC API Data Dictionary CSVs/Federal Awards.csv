@@ -1,0 +1,28 @@
+FEDERAL AWARDS ENDPOINT,https://api.fac.gov/federal_awards,Unnamed: 2,Unnamed: 3
+FIELD NAME,DESCRIPTION,DETAILS,CHARACTER LIMITS/LENGTH
+report_id,Identifier for the audit report,,25
+auditee_uei,Unique Entity Identifier (UEI) of the auditee,,12 to 13
+audit_year,Year the audit was conducted,,4
+fac_accepted_date,Date when the FAC accepted an audit,mm/dd/yyyy,10
+award_reference,The award reference number as listed in SF-SAC Section 1: Federal Awards. Award references will be formatted “AWARD-####”.,FAC system generated sequence number used to link to Findings data between CFDA/ALN Info and Findings,10
+federal_agency_prefix,Two-digit prefix identifying the federal awarding agency,"For programs with no ALN or if the ALN is Unknown, a ""U"" will appear followed by a two-digit number (e.g. U12) to identify one or more Federal award lines that form the program. 
+
+",2 to 13
+federal_award_extension,Additional identifier for the federal award,"If the Federal program is part of the Research and Development (R&D) cluster and the three-digit ALN extension is unknown, an ""RD"" will appear. If the Federal program is part of the R&D cluster and the ALN Three-Digit Extension is known, the ALN will appear.",2 to 13
+additional_award_identification,Other data used to identify the award which is not a CFDA/ALN number ,"For example--program year, contract number, state issued numbers, etc. This field is required if: an unknown ALN Three Digit Extension (e.g. U12) in the ALN field is entered or ""RD"" is entered for the ALN Three Digit Extension in the ALN field. This field should be blank if there is a known CFDA/ALN.",0 to 241
+federal_program_name,Name of the federal program that provided the funding,,0 to 371
+amount_expended,Total amount of federal funds expended for an award,Rounded to the nearest whole dollar,-447813896 to 54873398849
+cluster_name,Name of the cluster to which this federal award belongs,"If the program isn't part of a cluster, ""N/A"" will appear. If the program is part of a state cluster, “State Cluster” will appear. If the cluster name isn't on the drop-down list, ""Other Cluster Not Listed Above"" will appear.",1 to 75
+other_cluster_name,The name of the cluster (if not listed in the compliance supplement),,0 to 111
+state_cluster_name,State-designated cluster name if applicable,"If the program is part of a state cluster, the State Cluster name will appear. If the program isn't part of a state cluster, this will be blank.",0 to 75
+cluster_total,Total federal awards expended for each cluster in the audit,,-2963764 to 54935748805
+federal_program_total,Total amount of federal funding for the specific program,,-10726532 to 54873398849 
+is_major,Indicates if the award is classified as a major program ,"If the Federal program is a major program, ""Y"" will appear, then either letter ""U, Q, A, or D"" will appear for ""audit_report_type"": U=Unqualifed, Q=Qualified, A=Adverse, D=Disclaimer. This field will be blank or ""N"" if not a major program.",2 to 5
+is_loan,Indicates if the award is a loan ,"Y = Yes, N = No",2 to 5
+loan_balance,"Outstanding loan balance at the end of the audit period, if applicable",,0 to 12
+is_direct,Indicates if the funding was received directly from a federal agency or from a pass-through entity,"""Y"" if the award came directly from a Federal awarding agency. ""N""  if award did not come directly from a Federal awarding agency (i.e. ""N"" if the award came from a passthrough entity)",2 to 5
+audit_report_type,Type of report issued on the major program compliance,"U=Unqualifed, Q=Qualified, A=Adverse, D=Disclaimer",1
+findings_count,Number of audit findings for the federal program ,Only available for audit years 2013 and beyond,0 to 21
+is_passthrough_award,Indicates if part or all of the award was passed by auditee to a subrecipient ,"Y = Yes, N = No",2 to 5
+passthrough_amount,Amount of funding passed by auditee to subrecipient,,0 to 8
+NOTE: Additional passthrough information appears on the Passthrough endpoint,,,

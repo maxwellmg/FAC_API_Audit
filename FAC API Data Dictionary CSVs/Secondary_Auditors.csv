@@ -1,0 +1,16 @@
+SECONDARY_AUDITORS ENDPOINT,https://api.fac.gov/secondary_auditors,Unnamed: 2,Unnamed: 3
+FIELD NAME,DESCRIPTION,DETAILS,CHARACTER LIMITS/LENGTH
+report_id,Identifier for the audit report,,25
+auditee_uei,Unique Entity Identifier (UEI) of the auditee,,12 to 13
+audit_year,Year in which the audit was conducted,,4
+fac_accepted_date,Date when the FAC accepted an audit,mm/dd/yyyy,10
+auditor_ein,Employer Identification Number (EIN) of the secondary auditor,,9
+auditor_name,Name of the auditor,,2 to 100
+contact_name,Name of the contact person,,2 to 100
+contact_title,Title of the contact person,,3 to 49
+contact_email,Email address of the contact person,,6 to 320
+contact_phone,Phone number of the contact person,,10 to 14
+address_street,Street address of the contact person,,2 to 52
+address_city,City where the contact person is located,,4 to 19
+address_state,State where the contact is located,,2
+address_zipcode,ZIP code of the contact person,,5 to 9

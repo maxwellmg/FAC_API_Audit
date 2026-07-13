@@ -1,0 +1,66 @@
+GENERAL ENDPOINT,https://api.fac.gov/general,Unnamed: 2,Unnamed: 3
+FIELD NAME,DESCRIPTION,DETAILS,CHARACTER LIMITS/LENGTH
+report_id,Unique identifier for the audit report,,25
+auditee_uei,Unique Entity Identifier (UEI) of the auditee,,12 to 13
+audit_year,Year in which the audit was conducted,,4
+auditee_certify_name,Name of auditee certifying official,,2 to 100
+auditee_certify_title,Title of auditee certifying official,,2 to 100
+auditee_contact_name,Name of auditee's primary contact,,2 to 100
+auditee_email,Email address of the auditee's primary contact,,6 to 320
+auditee_name,Full name of the auditee organization,,2 to 100
+auditee_phone,Phone number of the auditee,,10
+auditee_contact_title,Job title of the auditee's primary contact,,2 to 100
+auditee_address_line_1,Street address of the auditee,,2 to 100
+auditee_city,City where the auditee is based,,2 to 100
+auditee_state,State where the auditee is based,,2
+auditee_ein,Employer Identification Number (EIN) of the auditee,,9
+auditee_zip,Auditee's zip code,,5 to 9
+auditor_certify_name,Name of auditor certifying official,,2 to 100
+auditor_certify_title,Title of auditor certifying official,,2 to 100
+auditor_phone,Phone number of the auditor,,10
+auditor_state,State where the auditor is based,,2
+auditor_city,U.S. city where the auditor is based (not applicable for international addresses),,0 to 100
+auditor_contact_title,Job title of the auditor,,2 to 100
+auditor_address_line_1,Street address of the auditor,,2 to 100
+auditor_zip,Auditor's zip code,,5 to 9
+auditor_country,Country where the auditor is based,,2 to 56
+auditor_contact_name,Name of the auditor,,2 to 100
+auditor_email,Email address of the auditor,,6 to 320
+auditor_firm_name,Name of the auditing firm,,2 to 100
+auditor_foreign_address,Address of the auditor (if international),,0 to 100
+auditor_ein,Employer Identification Number (EIN) of the auditing firm ,Only available for audit years 2013 and beyond,9
+cognizant_agency,Two-digit federal agency prefix of the cognizant agency,,2
+oversight_agency,Two-digit federal agency prefix of the oversight agency,,2
+date_created,The first date an audit component or Form SF-SAC was received by the Federal audit Clearinghouse ,mm/dd/yyyy,10
+ready_for_certification_date,Date when the report was marked as ready for certification,mm/dd/yyyy,10
+auditor_certified_date,Date when the auditor certified the report ,mm/dd/yyyy,10
+auditee_certified_date,Date when the auditee certified the report ,mm/dd/yyyy,10
+submitted_date,Date when the auditee submitted the report to the FAC,mm/dd/yyyy,10
+fac_accepted_date,Date when the FAC accepted an audit,mm/dd/yyyy,10
+fy_end_date,End date of the fiscal year covered by the audit ,mm/dd/yyyy,10
+fy_start_date,Start date of the fiscal year covered by the audit ,mm/dd/yyyy,10
+audit_type,Type of audit conducted ,"e.g., single audit, program specific, or alternative compliance examination engagement",12 to 16
+gaap_results,General Accepted Accounting Principles (GAAP) - Type of report issued on the financial statements ,"U=Unqualifed, Q=Qualified, A=Adverse, D=Disclaimer",15 to 77
+sp_framework_basis,Special purpose framework that was used as the basis of accounting ,"Cash basis, Tax basis, Regulatory basis, Contractual basis, or Other basis",0 to 17
+is_sp_framework_required,Indicates whether a special purpose framework was required ,"Y = Yes, N = No", 2 to 3
+sp_framework_opinions,The auditor's opinion on the special purpose framework,"U=Unqualifed, Q=Qualified, A=Adverse, D=Disclaimer",1
+is_going_concern_included,"Indicates if auditor included a ""going concern"" disclosure","Y = Yes, N = No", 2 to 3
+is_internal_control_deficiency_disclosed,Indicates if auditor disclosed internal control deficiencies ,"Y = Yes, N = No", 2 to 3
+is_internal_control_material_weakness_disclosed,Indicates if auditor disclosed material weaknesses in internal controls ,"Y = Yes, N = No", 2 to 3
+is_material_noncompliance_disclosed,Indicates if auditor disclosed material noncompliance,"Y = Yes, N = No", 2 to 3
+dollar_threshold,Dollar threshold to distinguish between type A and type B programs,,1 to 7409350297
+is_low_risk_auditee,Indicates if the auditee qualifies as low risk,"Y = Yes, N = No", 2 to 3
+agencies_with_prior_findings,Indicates whether or not the report includes a Summary Schedule of Prior Year Audit Findings ,"Y = Yes, N = No", 2 to 3
+entity_type,Self-reported type of entity ,"i.e., States, Local Governments, Indian Tribes, Institutions of Higher Education, NonProfit",5 to 10
+number_months,Number of months covered in the audit period,,0 to 2
+audit_period_covered,Audit period covered by audit ,"Annual, biennial, or other number of months",5 to 8
+total_amount_expended,Total amount of federal funds expended by the auditee,, 0 to 241863115093
+type_audit_code,Code indicating the type of audit conducted,,2
+is_public,Indicates if the audit report is publicly available ,"True, False",4 to 5
+data_source,Source of the audit data,,6
+is_aicpa_audit_guide_included,Indicates if the audit follows AICPA guidance ,"Y = Yes, N = No", 2 to 3
+is_additional_ueis,Indicates if the audit coveres multiple UEIs ,"Y = Yes, N = No", 2 to 3
+resubmission_version,Number increments with each resubmission,Original submission is labelled zero,1 or 2
+resubmission_status,Indicates resubmission status,“most_recent” is the latest submission; “deprecated_by_resubmission” is a previous submission superseded by a more recent submission; or “unknown”,11 to 27
+is_multiple_eins,Indicates if the audit covers multiple EINs  ,"Y = Yes, N = No", 2 to 3
+is_secondary_auditors,Indicates if secondary auditors were involved ,"Y = Yes, N = No", 2 to 3

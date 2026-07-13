@@ -1,0 +1,12 @@
+NOTES_TO_SEFA ENDPOINT,https://api.fac.gov/notes_to_sefa,Unnamed: 2,Unnamed: 3
+FIELD NAME,DESCRIPTION,DETAILS,CHARACTER LIMITS/LENGTH
+report_id,Unique identifier for the audit report,,25
+auditee_uei,Unique Entity Identifier (UEI) of the auditee,,12 to 13
+audit_year,Year in which the audit was conducted,,4
+fac_accepted_date,Date when the FAC accepted an audit,mm/dd/yyyy,10
+title,Title of the note related to the Schedule of Expenditures of Federal Awards (SEFA),,0 to 822
+accounting_policies,Description of the accounting policies applied to the SEFA,,1 to 31439
+is_minimis_rate_used,Indicates whether the 10% de minimis indirect cost rate is used,"Y = Yes, N = No",1
+rate_explained,"Explanation of the indirect cost rate used, if applicable",,0 to 3800
+content,Content of the note,,0 to 18801
+contains_chart_or_table,Indicates whether the note contains a chart or table ,"Y = Yes, N = No. See PDF report for charts and tables",1

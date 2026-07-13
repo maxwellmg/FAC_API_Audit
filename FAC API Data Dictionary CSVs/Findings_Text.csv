@@ -1,0 +1,9 @@
+FINDINGS_TEXT ENDPOINT,https://api.fac.gov/findings_text,Unnamed: 2,Unnamed: 3
+FIELD NAME,DESCRIPTION,DETAILS,CHARACTER LIMITS/LENGTH
+report_id,Identifier for the audit report,,25
+auditee_uei,Unique Entity Identifier (UEI) of the auditee,,12 to 13
+audit_year,Year in which the audit was conducted,,4
+fac_accepted_date,Date when the FAC accepted an audit,mm/dd/yyyy,10
+finding_ref_number,Reference number assigned to the specific finding,The audit finding reference number as listed in Section 2: Federal Awards Findings. Audit finding reference numbers will be formatted “YYYY-###”.,8
+contains_chart_or_table,Indicates if the finding text contains a chart or table,"""Y"" if the full text in the Schedule of Findings and Questioned Costs includes a chart or table. ""N"" if it doesn't. See PDF report for charts and tables",1
+finding_text,"Full textual description of the finding, detailing the issue identified during the audit.","The full text of the audit finding as it appears in the Schedule of Findings and Questioned Costs. This doesn't include charts, tables, or footnotes.",1 to 31991
