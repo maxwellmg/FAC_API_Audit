@@ -267,11 +267,177 @@ Outputs, all in `data/processed/`:
   missingness %, distinct-value count, and (for numeric columns)
   min/mean/max, for both output tables.
 
-Summary
-I explored the data dictionaries, the live FAC API, and the workspace context (College Scorecard files, existing crosswalk script) before building anything, since that shaped several real decisions:
+## Local setup and run guide
 
-README_FAC_EDA.md — documents every decision: scope (entity_type=higher-ed, confirmed live: ~2,262 schools / ~16k audit-years), the grain strategy (raw → per-audit panel → one-row-per-school), what's aggregated from each endpoint and why, and known limitations.
-scripts/fac_eda_pipeline.py — pull (paginated API fetch, endpoint by endpoint) and process (builds the two output tables + an EDA missingness/profile summary) subcommands, plus all to run both.
-The most important thing I found while testing against real data, not something I'd have guessed from the dictionaries alone: auditee_uei is a "GSA_MIGRATION" placeholder for ~59% of rows (all pre-2022 audits — I verified this against Stanford's own 10-year filing history, where the name on file even changes twice). Grouping by UEI as originally planned would have silently merged unrelated schools. I switched the school-level join key to auditee_ein, which is 100% populated across the full date range, and kept UEI as a secondary column for downstream joins where it's available.
+The repo includes a few different workflows:
 
-One thing intentionally left undone: actually joining this to your school master table. FAC has no UNITID/OPEID and College Scorecard has no EIN/UEI, so there's no clean shared key — the output is shaped for a name+state fuzzy match (the same pattern already in college_scorecard_crosswalk/crosswalk.py), but I didn't have your school master file to build that join against. Happy to wire that up next if you want it.
+1. Split the Excel data dictionary into one CSV per sheet.
+2. Query the FAC API for a small proof-of-concept sample of audits.
+3. Merge the collected CSV outputs into a single Excel workbook.
+4. Run the larger EDA / feature-building pipeline.
+
+Follow the steps below from the repo root (`/Users/mmg/Desktop/Guidehouse/Work/FAC_API_Audit`).
+
+### 1. Create a local Python environment
+
+```bash
+cd /Users/mmg/Desktop/Guidehouse/Work/FAC_API_Audit
+python3 -m venv .venv
+source .venv/bin/activate
+```
+
+### 2. Install dependencies
+
+```bash
+pip install --upgrade pip
+pip install pandas openpyxl requests
+```
+
+### 3. Create your local FAC API key file
+
+The script expects a local key file named `.fac_api_key` in the repo root. This file is ignored by git and should never be committed.
+
+```bash
+cd /Users/mmg/Desktop/Guidehouse/Work/FAC_API_Audit
+printf '%s\n' 'YOUR_FAC_API_KEY_HERE' > .fac_api_key
+```
+
+You can also set the key via environment variable instead:
+
+```bash
+export FAC_API_KEY="YOUR_FAC_API_KEY_HERE"
+```
+
+The scripts will read the key from `FAC_API_KEY` first, then fall back to `.fac_api_key`.
+
+### 4. Split the Excel workbook into CSV files
+
+This converts `FAC API Data Dictionary.xlsx` into one CSV per worksheet, stored under `FAC API Data Dictionary CSVs/`.
+
+```bash
+python scripts/split_excel_sheets_to_csv.py "FAC API Data Dictionary.xlsx"
+```
+
+This writes files such as:
+
+- `FAC API Data Dictionary CSVs/General.csv`
+- `FAC API Data Dictionary CSVs/Federal Awards.csv`
+- `FAC API Data Dictionary CSVs/Findings.csv`
+
+The script strips the workbook prefix from file names and stores the outputs in a folder named `FAC API Data Dictionary CSVs`.
+
+### 5. Run the FAC API proof-of-concept
+
+The proof-of-concept script can run against either explicit `report_id` values or a CSV file containing recent IDs.
+
+#### Example A: run against specific report IDs
+
+```bash
+python scripts/poc_collect_audit_details.py \
+  --ids 2025-12-GSAFAC-0000422565,2024-12-GSAFAC-0000423894 \
+  --out poc_results_sample
+```
+
+#### Example B: read the most recent IDs from the `general` CSV
+
+```bash
+python scripts/poc_collect_audit_details.py \
+  --from-csv "FAC API Data Dictionary CSVs/General.csv" \
+  --id-column report_id \
+  --count 10 \
+  --out poc_results_10
+```
+
+The script will:
+
+- iterate over each `report_id`
+- query the main FAC endpoints (`general`, `federal_awards`, `findings`, etc.)
+- save one JSON file per audit in the output directory
+- write a combined CSV for each endpoint in `poc_results_10/csvs/`
+
+Typical output structure:
+
+```text
+poc_results_10/
+  2025-12-GSAFAC-0000422565.json
+  2024-12-GSAFAC-0000423894.json
+  ...
+  csvs/
+    general.csv
+    federal_awards.csv
+    findings.csv
+    findings_text.csv
+    corrective_action_plans.csv
+    passthrough.csv
+    notes_to_sefa.csv
+    resubmission.csv
+```
+
+### 6. Merge all collected CSVs into one Excel workbook
+
+Once the POC has written endpoint CSVs, this script combines them into a single `.xlsx` workbook with one sheet per CSV.
+
+```bash
+python scripts/merge_csvs_to_excel.py \
+  --csv-dir poc_results_10/csvs \
+  --out poc_results_10/combined.xlsx
+```
+
+This creates a workbook like:
+
+```text
+poc_results_10/combined.xlsx
+```
+
+with sheets such as `general`, `federal_awards`, `findings`, `corrective_action_plans`, etc.
+
+### 7. Run the full FAC EDA / feature-building pipeline
+
+The project also includes a larger pipeline script that pulls raw FAC API data and prepares feature tables.
+
+```bash
+# Pull raw data into data/raw
+python scripts/fac_eda_pipeline.py pull --entity-type higher-ed --out-dir data/raw
+
+# Build processed panel and school-level tables into data/processed
+python scripts/fac_eda_pipeline.py process --raw-dir data/raw --out-dir data/processed
+
+# Or do both in one command
+python scripts/fac_eda_pipeline.py all --out-dir data
+```
+
+### 8. Useful notes
+
+- The repo ignores generated data and API key files via `.gitignore`.
+- `data/` is generated output and should not be committed.
+- `FAC_API_KEY` and `.fac_api_key` are the only supported local key locations.
+- For a small test run, use `--count` on the POC script or `--max-reports` on the EDA pipeline to keep the dataset small while validating the logic.
+
+## Running it
+
+```bash
+# from FAC_API_Audit/, with a .fac_api_key file in place (already gitignored)
+
+# 1. Pull raw data (writes data/raw/*.csv)
+python scripts/fac_eda_pipeline.py pull --entity-type higher-ed --out-dir data/raw
+
+# 2. Build the panel + school-level feature tables (writes data/processed/*.csv)
+python scripts/fac_eda_pipeline.py process --raw-dir data/raw --out-dir data/processed
+
+# Or both in one go:
+python scripts/fac_eda_pipeline.py all --out-dir data
+```
+
+Useful flags on `pull`: `--max-reports N` for a fast test run,
+`--audit-year-min` / `--audit-year-max` to restrict the date range,
+`--batch-size` to change how many `report_id`s are packed into each
+child-endpoint request (default 100), `--refresh` to re-pull over
+existing raw CSVs.
+
+**Scale note**: a full unfiltered `higher-ed` pull is ~16,000 audit
+reports; `federal_awards`/`passthrough`/`notes_to_sefa` are the largest
+child tables (a single large university system's one-year audit alone can
+run several thousand `federal_awards` rows) — expect the full raw pull to
+take a while and produce tens of MB of CSVs. Test with `--max-reports`
+first. `data/` is gitignored (see `.gitignore`) since it's fully
+regenerable from the script.
