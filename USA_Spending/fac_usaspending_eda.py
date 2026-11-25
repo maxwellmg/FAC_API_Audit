@@ -27,26 +27,23 @@ def norm_id(s):
 
 def section(title): print(f"\n{'=' * 100}\n{title}\n{'=' * 100}")
 
-# %% 1. FAC Findings: the six ID columns, one row per school/campus
-fac = pd.read_excel(FAC_FILE, sheet_name="FAC_Findings", usecols=FAC_COLS, dtype=str)
-fac["EIN"] = norm_id(fac["EIN"])                          # carried along as a clean 9-digit string
-fac["_key"] = fac[FAC_KEY].astype("string").str.split(r"[,;|/\s]+")  # a cell may list several UEIs
-fac = fac.explode("_key", ignore_index=True).assign(_key=lambda d: norm_id(d["_key"]))  # one row per UEI
-fac[FAC_KEY] = fac["_key"]                                # UEIS now holds the single, cleaned UEI that matches
-fac = fac.dropna(subset=["_key"]).drop_duplicates()       # findings sheets repeat a school once per finding
-shared = fac["_key"].duplicated().sum()
-print(f"FAC: {len(fac):,} rows | {fac['_key'].nunique():,} unique UEIs | {fac['School Code'].nunique():,} school codes")
-if shared: print(f"Note: {shared} extra rows share a UEI with another row; matching spending rows repeat for each (de-duplicated in EDA).")
+# %% 1. FAC Findings: one row per award -> collapse to one lookup row per (School Code, UEI) before merging
+raw = pd.read_excel(FAC_FILE, sheet_name="FAC_Findings", usecols=FAC_COLS, dtype=str)
+fac_rows = raw.groupby("School Code").size()              # FAC award records per school (kept for the EDA)
+raw["EIN"] = norm_id(raw["EIN"])                          # carried along as a clean 9-digit string
+raw["_key"] = raw[FAC_KEY].astype("string").str.split(r"[,;|/\s]+")  # a cell may list several UEIs
+raw = raw.explode("_key", ignore_index=True).assign(_key=lambda d: norm_id(d["_key"])).dropna(subset=["_key"])
+raw[FAC_KEY] = raw["_key"]                                # UEIS now holds the single, cleaned UEI that matches
+join = lambda s: "; ".join(sorted(s.dropna().unique()))  # keep every distinct campus / UNITID / EIN value
+fac = raw.groupby(["School Code", "_key"], as_index=False).agg({c: join for c in FAC_COLS if c != "School Code"})
+shared = fac.loc[fac["_key"].duplicated(), "_key"].nunique()
+print(f"FAC: {len(raw):,} award rows -> {len(fac):,} school/UEI rows | {fac['School Code'].nunique():,} school codes")
+if shared: print(f"Note: {shared} UEI(s) belong to more than one School Code; their spending is listed under each school.")
 
 # %% 2-3. Filter each USAspending CSV in chunks -> temp file -> stack temps per naming convention
 def file_order(p):  # base name, then trailing _# as an integer, so _10 comes after _9
     m = re.match(r"(.*)_(\d+)\.csv$", p.name, re.I)
     return (m.group(1), int(m.group(2))) if m else (p.stem, 0)
-
-header = pd.read_csv(next(DATA_DIR.glob("*.csv")), nrows=0).columns
-if SPEND_KEY not in header:
-    ids = [c for c in header if re.search(r"(^|_)(ein|tin|uei|duns)(_|$)", c, re.I)]
-    raise KeyError(f"'{SPEND_KEY}' is not a USAspending column. Recipient ID columns available: {ids}")
 
 for conv in CONVENTIONS:
     files = sorted(DATA_DIR.glob(f"*{conv}*.csv"), key=file_order)
@@ -56,7 +53,7 @@ for conv in CONVENTIONS:
         kept = []
         for chunk in pd.read_csv(f, chunksize=CHUNK_ROWS, dtype=str, encoding_errors="replace"):
             chunk["_key"] = norm_id(chunk[SPEND_KEY])
-            hit = chunk[chunk["_key"].isin(fac["_key"])]                 # keep only FAC EINs, original row order
+            hit = chunk[chunk["_key"].isin(fac["_key"])]                 # keep only FAC UEIs, original row order
             hit = hit.merge(fac, on="_key", how="left", suffixes=("_usaspending", ""))
             if len(hit): kept.append(hit)
         print(f"  {f.name}: kept {sum(map(len, kept)):,} rows")
@@ -86,10 +83,11 @@ for f in sorted(OUT_DIR.glob("*_merged.csv")):
     display(df.describe().T.assign(pct_missing=df.isna().mean().mul(100)))
     money = [c for c in df.columns if MONEY.search(c) and not NOT_MONEY.search(c)]
     df[money] = df[money].apply(pd.to_numeric, errors="coerce")
-    txn = next((c for c in df.columns if c.endswith("transaction_unique_key")), None)
-    award = next((c for c in df.columns if c.endswith("award_unique_key")), None)
-    by_school = df.drop_duplicates(["School Code", txn]) if txn else df   # campuses sharing an EIN
-    uniq = df.drop_duplicates(txn) if txn else df                         # each transaction once
+    txn = next(c for c in df.columns if c.endswith("transaction_unique_key"))
+    award = next(c for c in df.columns if c.endswith("award_unique_key"))
+    uniq = df.drop_duplicates(txn)        # each transaction once, even if its UEI belongs to two school codes
+    awards = df.groupby(["School Code", award], as_index=False).agg(obligation=(OBL, "sum"), transactions=(OBL, "size"),
+        agency=("awarding_agency_name", "first"), first_action=("action_date", "min"), last_action=("action_date", "max"))
 
     section(f"{name} | B. Match check: FAC school vs. USAspending recipient")
     unmatched = sorted(set(fac["School Code"].dropna()) - set(df["School Code"].dropna()))
@@ -98,25 +96,26 @@ for f in sorted(OUT_DIR.glob("*_merged.csv")):
 
     section(f"{name} | C. Dollar fields (unique transactions; award-level 'total_*' fields repeat per transaction, don't sum them)")
     display(uniq[money].describe().T.assign(sum=uniq[money].sum(), pct_missing=uniq[money].isna().mean().mul(100)))
+    print(f"Award size ({OBL} summed per award):"); display(awards.drop_duplicates(award)["obligation"].describe())
 
-    section(f"{name} | D. Summary statistics by School Code ({OBL})")
-    g = by_school.groupby("School Code")
-    summ = g[OBL].agg(["count", "sum", "mean", "median", "min", "max"]).rename(columns={"count": "transactions", "sum": "total"})
-    summ.insert(0, "School Name", g["School Name"].first())
-    if award: summ["unique_awards"] = g[award].nunique()
-    if "awarding_agency_name" in df: summ["n_agencies"] = g["awarding_agency_name"].nunique()
-    if "action_date" in df: summ["first_action"], summ["last_action"] = g["action_date"].min(), g["action_date"].max()
+    section(f"{name} | D. Summary statistics by School Code (transactions rolled up to one row per award first)")
+    g = awards.groupby("School Code")
+    summ = g["obligation"].agg(awards="count", total="sum", mean_per_award="mean", median_per_award="median", largest_award="max")
+    summ.insert(0, "School Name", df.groupby("School Code")["School Name"].first())
+    summ = summ.assign(transactions=g["transactions"].sum(), fac_award_rows=fac_rows, n_agencies=g["agency"].nunique(),
+        largest_award_pct=lambda d: d["largest_award"] / d["total"] * 100, first_action=g["first_action"].min(), last_action=g["last_action"].max())
     display(summ.sort_values("total", ascending=False))
     print("Distribution across schools:"); display(summ.describe())
+    print("Largest awards:"); display(awards.nlargest(15, "obligation"))
 
     section(f"{name} | E. Breakdowns by USAspending category (top 15 by {OBL})")
     for c in [c for c in BREAKDOWNS if c in df]:
-        t = uniq.groupby(c, dropna=False)[OBL].agg(transactions="count", total="sum").sort_values("total", ascending=False)
+        t = df.groupby(c, dropna=False).agg(schools=("School Code", "nunique"), awards=(award, "nunique"), transactions=(txn, "nunique"))
+        t["total"] = uniq.groupby(c, dropna=False)[OBL].sum()
         t["pct_of_total"] = t["total"] / t["total"].sum() * 100
-        print(f"\n--- {c} ({len(t):,} distinct values) ---"); display(t.head(15))
+        print(f"\n--- {c} ({len(t):,} distinct values) ---"); display(t.sort_values("total", ascending=False).head(15))
 
-    if "awarding_agency_name" in df:
-        section(f"{name} | F. School Code x top 8 awarding agencies ({OBL})")
-        top = uniq.groupby("awarding_agency_name")[OBL].sum().nlargest(8).index
-        display(by_school[by_school["awarding_agency_name"].isin(top)].pivot_table(
-            index="School Code", columns="awarding_agency_name", values=OBL, aggfunc="sum", fill_value=0))
+    section(f"{name} | F. School Code x top 8 awarding agencies ({OBL})")
+    top = uniq.groupby("awarding_agency_name")[OBL].sum().nlargest(8).index
+    display(df[df["awarding_agency_name"].isin(top)].pivot_table(
+        index="School Code", columns="awarding_agency_name", values=OBL, aggfunc="sum", fill_value=0))
