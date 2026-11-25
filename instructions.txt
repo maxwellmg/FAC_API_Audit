@@ -1,0 +1,1 @@
+I am attempting to create an API call which will pull all of the relevant audit information for a couple of test examples. "https://www.fac.gov/api/getting-started/" contains the code for initially connecting, and "https://www.fac.gov/api/dictionary/" shows the fields that are available
